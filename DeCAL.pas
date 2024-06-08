@@ -3158,6 +3158,30 @@ type
   @param binary The binary function to be applied. }
   function transformBinaryInTo(start1, finish1, start2, output : DIterator; binary : DBinary) : DIterator;
 
+  {** TransformUnary applies an unary function to objects from container,
+  and stores the result into the output container.
+  @param container The container of objects that will be passed as a parameter to the unary function.
+  @param output The container where the results will go.
+  @param unary The unary function to be applied. }
+  procedure transformUnary(container, output : DContainer; unary : DUnary);
+
+  {** TransformUnaryTo applies an unary function to objects from container,
+  and stores the result at the output iterator.
+  @param container The container of objects that will be passed as a parameter to the unary function.
+  @param output The iterator where the results will go.
+  @param unary The unary function to be applied. }
+  function transformUnaryTo(container : DContainer; output : DIterator; unary : DUnary) : DIterator;
+
+  {** TransformUnaryInTo applies an unary function to objects. The objects are
+  taken from the range starting at start1 and ending at finish1. The results
+  of the applied function are put at output.
+  @param start1 The start of the range for the first object.
+  @param finish1 The end of the range for the first object.  Note that this
+                 parameter dictates how many objects will be processed.
+  @param output The container where the results will go.
+  @param binary The binary function to be applied. }
+  function transformUnaryInTo(_start, _finish, output : DIterator; unary : DUnary) : DIterator;
+
   ////////////////////////////////////////////////////////////////////
   //
   // Utilities
@@ -11264,6 +11288,26 @@ begin
       advance(start2);
     end;
   result := output;
+end;
+
+procedure transformUnary(container, output : DContainer; unary : DUnary);
+begin
+  transformUnaryTo(container, output.finish, unary);
+end;
+
+function transformUnaryTo(container : DContainer; output : DIterator; unary : DUnary) : DIterator;
+begin
+  Result := transformUnaryInTo(container.start, container.finish, output, unary);
+end;
+
+function transformUnaryInTo(_start, _finish, output : DIterator; unary : DUnary) : DIterator;
+begin
+  while not equals(_start, _finish) do
+  begin
+    _outputRef(output, unary(getRef(_start)^));
+    advance(_start);
+  end;
+  Result := output;
 end;
 
 ////////////////////////////////////////////////////////////////////

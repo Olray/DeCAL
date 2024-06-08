@@ -96,6 +96,8 @@
         <DCCReference Include="Test_Map.pas"/>
         <DCCReference Include="DeCAL.MockClasses.pas"/>
         <DCCReference Include="Test_SuperStream.pas"/>
+        <DCCReference Include="Test_Regress.pas"/>
+        <DCCReference Include="Test_Transformations.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
