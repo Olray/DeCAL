@@ -51,9 +51,9 @@ begin
   try
     map := DMap.Create;
     map.putPair([1, 100]);
-    map.putPair([2, 'A WideString']);
+    map.putPair([2, 'A Wide String']);
     map.putPair([3, 3.1415]);
-    MockAnsiString := 'An AnsiString';
+    MockAnsiString := 'An Ansi String';
     map.putPair([4, MockAnsiString]);
 
     // check if added vars are in order
@@ -69,7 +69,7 @@ begin
     SetToValue(iter);
     Assert.AreEqual(100, getInteger(iter), 'getInteger() error');
     Advance(iter);
-    Assert.AreEqual('A WideString', getString(iter), 'getString() error');
+    Assert.AreEqual('A Wide String', getString(iter), 'getString() error');
     Advance(iter);
     Assert.AreEqual(3.1415, getExtended(iter), 'getExtended() error');
     Advance(iter);

@@ -8,26 +8,40 @@ interface
 uses
   System.SysUtils,  // IntToStr
   DeCAL,
-  DeCAL.MockClasses,
+  DeCAL.MockData,
   DUnitX.TestFramework;
 
 type
+  DSetClass = class of DInternalMap;
+
   [TestFixture]
   TDecalRegress = class
+  private
+
+    procedure SequentialBasicCanStoreAndRetrieveSimpleTypes(seq: DSequence);
+    procedure SequentialBasicCanCloneItself(seq: DSequence);
+    procedure SequentialAlgoCanSortIntegers(seq : DSequence);
+
+    procedure AssociativeBasicCanStoreAndRetrieveSimpleTypes(assoc: DAssociative);
+    procedure AssociativeBasicCanCloneItself(assoc : DAssociative);
+
   public
+
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
 
     [Test]
-    procedure TestAssociative;
+    procedure TestDArray;
     [Test]
-    procedure TestSorting;
-//    [Test]
-//    procedure TestCanStoreAndRetriveObjects;
-//    [Test]
-//    procedure TestCanStoreAndRetriveInterfaces;
+    procedure TestDList;
+    [Test]
+    procedure TestDMap;
+    [Test]
+    procedure TestDSet;
+    [Test]
+    procedure TestDHashSet;
   end;
 
 implementation
@@ -40,39 +54,147 @@ procedure TDecalRegress.TearDown;
 begin
 end;
 
-procedure TDecalRegress.TestAssociative;
-var h : DHashMap;
-    i : Integer;
-    iter : DIterator;
-    s : DHashSet;
+{ Suitable for
+  - DList,
+  - DArray }
+procedure TDecalRegress.SequentialBasicCanStoreAndRetrieveSimpleTypes(seq: DSequence);
 begin
-  h := DHashMap.Create;
+  AddSimpleTestData(seq);
+  VerifySimpleAddedTestData(seq);
 
-  for i := 0 to 100 do
-    h.putPair([i, IntToStr(i)]);
+  seq.clear;
+  Assert.IsTrue(seq.isEmpty, eReport('SequentialBasicCanStoreAndRetrieveSimpleTypes: DSequence ist not empty after calling clear()', seq));
+end;
 
-  iter := h.start;
-  while IterateOver(iter) do
+procedure TDecalRegress.SequentialBasicCanCloneItself(seq: DSequence);
+var clone : DContainer;
+begin
+  AddSimpleTestData(seq);
+
+  clone := seq.clone;
+  // the clone must pass the verification
+  VerifySimpleAddedTestData(clone);
+
+  seq.clear;
+  Assert.IsTrue(seq.isEmpty, eReport('SequentialBasicCanCloneItself: DSequence ist not empty after calling clear()', seq));
+
+  clone.Free;
+end;
+
+procedure TDecalRegress.SequentialAlgoCanSortIntegers(seq : DSequence);
+var maxval : Integer;
+var val : Integer;
+var iter : DIterator;
+begin
+  AddRandomIntegers(seq);
+  sort(seq);
+
+  maxval := -1;
+  iter := seq.start;
+  while(iterateOver(iter)) do
   begin
-    SetToKey(iter);
-    i := getInteger(iter);
-    SetToValue(iter);
-    Assert.AreEqual(i, StrToInt(getString(iter)));
-//    writeln(GetString(iter));
+    val := getInteger(iter);
+    Assert.IsTrue(maxval < val, eReport(Format('Sorting failed with %d being smaller than %d', [val, maxval]), seq));
+    maxval := val;
   end;
 
-  iter := h.locate([55]);
-  Assert.IsFalse(atEnd(iter));
-//  if not atEnd(iter) then
-//    writeln(getString(iter));
+  seq.clear;
+  Assert.IsTrue(seq.isEmpty, eReport('SequentialAlgoCanSortIntegers: DSequence ist not empty after calling clear()', seq));
+end;
 
-  iter := h.locate([9000]);
-  Assert.IsTrue(atEnd(iter));
-//  if not atEnd(iter) then
-//    writeln('error');
+procedure TDecalRegress.AssociativeBasicCanCloneItself(assoc: DAssociative);
+var clone : DAssociative;
+begin
+  PutSimpleTestData(assoc);
+  clone := assoc.clone as DAssociative;
+  // clone must pass verification
+  VerifySimplePutTestData(clone, False);
+  clone.Free;
 
-  h.free;
+  assoc.clear;
+  Assert.IsTrue(assoc.isEmpty, eReport('AssociativeBasicCanCloneItself: DAssociative ist not empty after calling clear()', assoc));
+end;
 
+procedure TDecalRegress.AssociativeBasicCanStoreAndRetrieveSimpleTypes(assoc: DAssociative);
+begin
+  PutSimpleTestData(assoc);
+  { false means to walk the ordered container and not use locate }
+  VerifySimplePutTestData(assoc, False);
+
+  assoc.clear;
+  Assert.IsTrue(assoc.isEmpty, eReport('AssociativeBasicCanStoreAndRetrieveSimpleTypes: DAssociative ist not empty after calling clear()', assoc));
+end;
+
+procedure TDecalRegress.TestDArray;
+var container : DArray;
+begin
+  container := DArray.Create;
+  SequentialBasicCanStoreAndRetrieveSimpleTypes(container);
+  SequentialBasicCanCloneItself(container);
+  SequentialAlgoCanSortIntegers(container);
+  container.Free;
+end;
+
+procedure TDecalRegress.TestDList;
+var container : DList;
+begin
+  container := DList.Create;
+  SequentialBasicCanStoreAndRetrieveSimpleTypes(container);
+  SequentialBasicCanCloneItself(container);
+  SequentialAlgoCanSortIntegers(container);
+  container.Free;
+end;
+
+procedure TDecalRegress.TestDMap;
+var container : DMap;
+begin
+  container := DMap.Create;
+  AssociativeBasicCanStoreAndRetrieveSimpleTypes(container);
+  AssociativeBasicCanCloneItself(container);
+  container.Free;
+end;
+
+procedure TDecalRegress.TestDSet;
+var container : DSet;
+var integers : DArray;
+var iter : DIterator;
+var rnd : Integer;
+begin
+  // get a list of integers to play with
+  integers := DArray.Create;
+  AddRandomIntegers(integers);
+
+  // copy integers to set
+  container := DSet.Create;
+  iter := integers.start;
+  while(iterateOver(iter)) do
+    container.add([getInteger(iter)]);
+
+  // test if every 10th integer is included
+  iter := integers.start;
+  while(not atEnd(iter)) do
+  begin
+    Assert.IsTrue(container.includes([getInteger(iter)]), 'Item not found in DSet, but it should be there');
+    AdvanceBy(iter, 10);
+  end;
+
+  // test if non-existing integers are excluded
+  for var i := 1 to 50 do
+  begin
+    rnd := random(MaxInt);
+    iter := find(integers, [rnd]);
+    if atEnd(iter) then
+      Assert.IsFalse(container.includes([rnd]));
+  end;
+
+  integers.Free;
+  container.Free;
+end;
+
+procedure TDecalRegress.TestDHashSet;
+var i : Integer;
+    s : DHashSet;
+begin
   s := DHashSet.Create;
   for i := 0 to 100 do
     s.add([i]);
@@ -83,36 +205,5 @@ begin
   s.free;
 end;
 
-procedure TDecalRegress.TestSorting;
-var a : DArray;
-    last, i : Integer;
-    iter, x : DIterator;
-begin
-  a := DArray.Create;
-
-  for i := 1 to 1000 do
-    a.add([Random(32000)]);
-
-  sort(a);
-
-  // show the first 25 entries
-  iter := a.start;
-  x := iter;
-  advanceBy(x, 25);
-
-  last := -1;
-  while not DeCAL.equals(iter, x) do
-    begin
-      i := getInteger(iter);
-      Assert.IsFalse(last > i, 'Sorting error');
-//      if last > i then
-//        writeln('Sorting error found');
-      last := i;
-//      writeln(i);
-      advance(iter);
-    end;
-
-  a.free;
-end;
 
 end.
