@@ -8269,7 +8269,7 @@ end;
 
 function DMap.usesPairs : Boolean;
 begin
-  Result := false;
+  Result := true;
 end;
 
 constructor DMultiMap.Create;
