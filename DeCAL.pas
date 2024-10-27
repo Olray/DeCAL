@@ -10518,13 +10518,14 @@ begin
   Result := removeCopyIfIn(source.start, source.finish, dest, test);
 end;
 
-function removeCopyIfIn(_start, _end, dest : DIterator; test : DTest) : DIterator;
+function removeCopyIfIn(_start, _end, dest : DIterator; test : DTest) : DIterator; deprecated 'Behavior of this function has changed. See https://github.com/Olray/DeCAL/issues/1';
 var o : PDObject;
 begin
   while not equals(_start, _end) do
     begin
       o := getRef(_start);
-      if test(o^) then
+//      if test(o^) then
+      if not test(o^) then
         begin
           _output(dest, o^);
         end;

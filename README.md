@@ -29,3 +29,11 @@ unknown in the 1990's.
 
 I'm currently using DeCAL with Delphi 11 "Community Edition" with no problems. I wouldn't suggest using it for large projects due to the
 missing tests. **Use this fix at your own risk**
+
+## Changes
+A bug was reported by Doug Winsby on 27th Oct 2024 claiming that the behavior of removeCopyIfIn routine was reversed: Instead of removing
+objects for which the DTest function returned true, it was including them, effectively reversing the intended behavior.
+
+The bug was eliminated and the function removeCopyIfIn marked as deprecated with a message leading users to this documentation.
+
+Thanks to Doug Winsby for the report.
