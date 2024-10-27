@@ -99,6 +99,7 @@
         <DCCReference Include="Test_Regress.pas"/>
         <DCCReference Include="Test_Transformations.pas"/>
         <DCCReference Include="DeCAL.MockData.pas"/>
+        <DCCReference Include="Test_Algorithms.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -120,6 +121,7 @@
                     <Source Name="MainSource">DeCAL.Test.dpr</Source>
                 </Source>
                 <Excluded_Packages>
+                    <Excluded_Packages Name="D:\Delphi\Packages\dclIconFontsImageList280.bpl">Datei D:\Delphi\Packages\dclIconFontsImageList280.bpl nicht gefunden</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k280.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automatisierungsserver</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp280.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
                 </Excluded_Packages>

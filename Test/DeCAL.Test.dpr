@@ -13,7 +13,8 @@ uses
   Test_SuperStream in 'Test_SuperStream.pas',
   Test_Regress in 'Test_Regress.pas',
   Test_Transformations in 'Test_Transformations.pas',
-  DeCAL.MockData in 'DeCAL.MockData.pas';
+  DeCAL.MockData in 'DeCAL.MockData.pas',
+  Test_Algorithms in 'Test_Algorithms.pas';
 
 begin
   TestInsight.DUnitX.RunRegisteredTests;
