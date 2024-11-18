@@ -14,7 +14,9 @@ uses
   Test_Regress in 'Test_Regress.pas',
   Test_Transformations in 'Test_Transformations.pas',
   DeCAL.MockData in 'DeCAL.MockData.pas',
-  Test_Algorithms in 'Test_Algorithms.pas';
+  Test_Algorithms in 'Test_Algorithms.pas',
+  Test_Sort in 'Test_Sort.pas',
+  DeCAL in '..\DeCAL.pas';
 
 begin
   TestInsight.DUnitX.RunRegisteredTests;
