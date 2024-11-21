@@ -3,6 +3,7 @@ unit Test_Algorithms;
 interface
 
 uses
+  System.SysUtils, // Format
   TestFramework,
   DUnitX.TestFramework,
   DeCAL;
@@ -11,11 +12,17 @@ type
   [TestFixture]
   TTestAlgorithms = class(TTestCase)
   private
+    FSum: Integer;
     function IsEvenInteger(const obj : DObject) : Boolean;
+    procedure AddValueToMemberVar(const obj: DObject); // DApply
+    function CalcSum(const obj1, obj2 : DObject): DObject; // DBinary
   published
     // 2024-10-27 Reported by Doug Winsby
     [Test]
     procedure TestRemoveCopyIfIn;
+
+    [Test]
+    procedure TestApply;
   end;
 
 implementation
@@ -84,6 +91,46 @@ begin
   finally
   c1.Free;
   end;
+end;
+
+
+procedure TTestAlgorithms.TestApply;
+const n = 200;
+var i: Integer;
+var iter: DIterator;
+var arr: DArray;
+var sum: DObject;
+var expected: Integer;
+begin
+  arr := DArray.Create;
+  try
+    for i := 1 to n do
+      arr.add([i]);
+    expected := (n*(n+1)) div 2;
+
+    sum := inject(arr, [0], CalcSum);
+    Assert.AreEqual(expected, sum.VInteger, Format('Wrong sum calculated with inject. Expected: %d, received: %d', [expected, sum.VInteger]));
+      // modify start value and try again
+    sum := inject(arr, [1], CalcSum);
+    Assert.AreEqual(expected+1, sum.VInteger, Format('Wrong sum calculated with inject. Expected: %d, received: %d', [expected+1, sum.VInteger]));
+
+    FSum := 0;
+    forEach(arr, AddValueToMemberVar);
+    Assert.AreEqual(expected, FSum, Format('Wrong sum calculated with forEach. Expected: %d, received: %d', [expected, FSum]));
+
+  finally
+    FreeAndNil(arr);
+  end;
+end;
+
+procedure TTestAlgorithms.AddValueToMemberVar(const obj: DObject);
+begin
+  FSum := FSum + obj.VInteger;
+end;
+
+function TTestAlgorithms.CalcSum(const obj1, obj2 : DObject): DObject;
+begin
+  Result.VInteger := obj1.VInteger + obj2.VInteger;
 end;
 
 initialization
