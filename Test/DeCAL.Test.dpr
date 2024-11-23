@@ -16,7 +16,8 @@ uses
   DeCAL.MockData in 'DeCAL.MockData.pas',
   Test_Algorithms in 'Test_Algorithms.pas',
   Test_Sort in 'Test_Sort.pas',
-  DeCAL in '..\DeCAL.pas';
+  DeCAL in '..\DeCAL.pas',
+  Test_Iterator in 'Test_Iterator.pas';
 
 begin
   TestInsight.DUnitX.RunRegisteredTests;

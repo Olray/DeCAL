@@ -105,6 +105,7 @@
         <DCCReference Include="Test_Algorithms.pas"/>
         <DCCReference Include="Test_Sort.pas"/>
         <DCCReference Include="..\DeCAL.pas"/>
+        <DCCReference Include="Test_Iterator.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
