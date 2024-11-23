@@ -8537,12 +8537,6 @@ begin
     (((diMarkFinish in iter1.flags) and (diMarkFinish in iter2.flags)) or
     ((iter1.bucketPosition = iter2.bucketPosition) and (iter1.bucket = iter2.bucket))
   );
-//  if(diMarkFinish in iter1.flags) and not (diMarkFinish in iter2.flags) then
-//    exit(false);
-//  if(diMarkFinish in iter2.flags) and not (diMarkFinish in iter1.flags) then
-//    exit(false);
-//  Result := ((diMarkFinish in iter1.flags) and (diMarkFinish in iter2.flags)) or
-//    ((iter1.bucketPosition = iter2.bucketPosition) and (iter1.bucket = iter2.bucket));
 end;
 
 procedure DInternalHash.iput(const iterator : DIterator; const obj : DObject);

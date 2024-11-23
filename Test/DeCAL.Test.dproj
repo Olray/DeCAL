@@ -106,6 +106,10 @@
         <DCCReference Include="Test_Sort.pas"/>
         <DCCReference Include="..\DeCAL.pas"/>
         <DCCReference Include="Test_Iterator.pas"/>
+        <DCCReference Include="Test_RandomTesting.pas"/>
+        <DCCReference Include="..\mwFixedRecSort.pas"/>
+        <DCCReference Include="..\DeCALIO.pas"/>
+        <DCCReference Include="..\SuperStream.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
