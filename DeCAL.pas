@@ -1383,7 +1383,9 @@ type
     function lower_bound(const obj : DObject) : DIterator;
     function upper_bound(const obj : DObject) : DIterator;
     function equal_range(const obj : DObject) : DRange;
-
+{$IFDEF TESTINSIGHT}
+    function getHeader : DTreeNode;
+{$ENDIF}
   end;
 
   ////////////////////////////////////////////////////////////////////
@@ -3314,6 +3316,11 @@ const
   vtUnicodeString = 17;
   vtLastVType = vtUnicodeString;
 
+{$IFDEF TESTINSIGHT}
+var
+  nil_node : DTreeNode = nil;
+{$ENDIF}
+
 implementation
 
 {$IFDEF UNICODE}
@@ -3327,7 +3334,9 @@ type
 {$ENDIF ~UNICODE}
 
 var
+{$IFNDEF TESTINSIGHT}
   nil_node : DTreeNode = nil;
+{$ENDIF}
   emptyDObject : DObject;
 
 function DeCALAlloc(sz : Integer) : Pointer;
@@ -6171,6 +6180,13 @@ begin
   Result := FHeader;
 end;
 
+{$IFDEF TESTINSIGHT}
+function DRedBlackTree.getHeader : DTreeNode;
+begin
+  Result := FHeader;
+end;
+{$ENDIF}
+
 ////////////////////////////////////////////////////////////////////
 //
 // DContainer
@@ -8516,8 +8532,17 @@ end;
 function DInternalHash.iequals(const iter1, iter2 : DIterator) : Boolean;
 begin
   Assert(iter1.handler = iter2.handler);
-  Result := ((diMarkFinish in iter1.flags) and (diMarkFinish in iter2.flags)) or
-    ((iter1.bucketPosition = iter2.bucketPosition) and (iter1.bucket = iter2.bucket));
+  Result := not (
+    (diMarkFinish in iter1.flags) xor (diMarkFinish in iter2.flags)) and
+    (((diMarkFinish in iter1.flags) and (diMarkFinish in iter2.flags)) or
+    ((iter1.bucketPosition = iter2.bucketPosition) and (iter1.bucket = iter2.bucket))
+  );
+//  if(diMarkFinish in iter1.flags) and not (diMarkFinish in iter2.flags) then
+//    exit(false);
+//  if(diMarkFinish in iter2.flags) and not (diMarkFinish in iter1.flags) then
+//    exit(false);
+//  Result := ((diMarkFinish in iter1.flags) and (diMarkFinish in iter2.flags)) or
+//    ((iter1.bucketPosition = iter2.bucketPosition) and (iter1.bucket = iter2.bucket));
 end;
 
 procedure DInternalHash.iput(const iterator : DIterator; const obj : DObject);
