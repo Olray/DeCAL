@@ -6384,7 +6384,7 @@ var i : DIterator;
 begin
   i := start; compare := nil;
   getComparator(compare);
-  while (compare(get(i),obj) <> 0) and (not atEnd(i)) do
+  while (compare(getRef(i)^,obj) <> 0) and (not atEnd(i)) do
     advance(i);
   Result := not atEnd(i);
 end;
@@ -6603,7 +6603,7 @@ var i : DIterator;
 begin
   i := start;
   advanceBy(i,pos);
-  Result := get(i);
+  Result := getRef(i)^;
 end;
 
 function DSequence.atRef(pos : Integer) : PDObject;
@@ -8162,7 +8162,7 @@ begin
   iter := tree.find(key);
   MorphIterator(iter);
   Assert(not atEnd(iter));
-  Result := get(iter);
+  Result := getRef(iter)^;
 end;
 
 function DInternalMap._locate(const key : DObject) : DIterator;
@@ -8832,7 +8832,7 @@ begin
         begin
           // gotcha
           advance(iter);
-          Result := get(iter);
+          Result := getRef(iter)^;
           exit;
         end;
       advanceBy(iter,2);
