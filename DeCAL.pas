@@ -8085,7 +8085,11 @@ procedure DInternalMap.cloneTo(newContainer : DContainer);
 var iter : DIterator;
     k,v : PDObject;
 begin
-  Assert(newContainer.usesPairs);
+  // sets are implemented as DAssociative descendants and they use sets,
+  // they return false for usesPairs anyways because values don't make sense
+  // in a set.
+//  Assert(newContainer.usesPairs);
+  Assert(newContainer is DAssociative);
   iter := start;
   while not atEnd(iter) do
     begin
@@ -8433,6 +8437,7 @@ begin
 
   Assert(FAllowDups = h.FAllowDups, 'Need to be of same type');
   h.FStorageClass := FStorageClass;
+  h.FCount := FCount;
   h.FBucketCount := FBucketCount;
   h.Setup;
 
