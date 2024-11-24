@@ -21,7 +21,8 @@ uses
   Test_RandomTesting in 'Test_RandomTesting.pas',
   mwFixedRecSort in '..\mwFixedRecSort.pas',
   DeCALIO in '..\DeCALIO.pas',
-  SuperStream in '..\SuperStream.pas';
+  SuperStream in '..\SuperStream.pas',
+  Test_Clone in 'Test_Clone.pas';
 
 begin
   TestInsight.DUnitX.RunRegisteredTests;
