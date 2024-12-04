@@ -21,11 +21,15 @@ type
     [Test]
     procedure Test_ContainerCloning;
 
+    [Test]
+    procedure Test_ClonedContainersHaveUniqueStrings;
+
   end;
 
 implementation
 uses
-  System.SysUtils;
+  System.SysUtils,
+  System.Hash;
 
 procedure TTestClone.FillContainer(container: DContainer);
 begin
@@ -120,6 +124,46 @@ begin
     Container.Free;
   end;
   LContainerClasses.Free;
+end;
+
+procedure TTestClone.Test_ClonedContainersHaveUniqueStrings;
+var RandomString: String;
+var RandomString2: String;
+var arr: DArray;
+var arrClone: DArray;
+var iter: DIterator;
+var map: DMap;
+var mapClone: DMap;
+begin
+  RandomString := THash.GetRandomString(10);
+  RandomString2 := THash.GetRandomString(10);
+
+  arr := DArray.Create;
+  arr.add([RandomString]);
+
+  arrClone := arr.clone as DArray;
+
+  iter := arr.start;
+  Assert.AreEqual(RandomString, getString(iter));
+
+    // free arr and check if we still have access to this random string
+  arr.Free;
+  iter := arrClone.start;
+  Assert.AreEqual(RandomString, getString(iter));
+
+  arrClone.Free;
+
+    // try the same with a map
+
+  map := DMap.Create;
+  map.putPair([1, RandomString]);
+  mapClone := map.clone as DMap;
+  iter := map.start;
+  Assert.AreEqual(RandomString, getString(iter));
+  map.Free;
+  iter := mapClone.start;
+  Assert.AreEqual(RandomString, getString(iter));
+  mapClone.Free;
 end;
 
 end.
