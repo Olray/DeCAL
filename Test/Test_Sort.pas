@@ -3,14 +3,13 @@ unit Test_Sort;
 interface
 
 uses
-  System.SysUtils, // Format
   TestFramework,
   DUnitX.TestFramework,
   DeCAL;
 
 type
 
-  PairItem = class
+  TPairItem = class
     SortValue : Integer;
     Order : Integer;
   end;
@@ -23,18 +22,18 @@ type
     FIndex: Integer;
       // sort
     function IntegerGenerator : DObject;
-    function IntegerComparator(const obj1, obj2: DObject) : Integer;
-    procedure RunTestContainer(container: DSequence);
-    procedure TestContainer(container: DSequence);
-    procedure TestContainerForIncreasingIntegers(container : DContainer);
+    function IntegerComparator(const Object1, Object2: DObject) : Integer;
+    procedure RunTestContainer(Container: DSequence);
+    procedure TestContainer(Container: DSequence);
+    procedure TestContainerForIncreasingIntegers(Container : DContainer);
       // stableSort
     function PairGenerator : DObject;
-    function PairComparator(const obj1, obj2: DObject) : Integer;
-    procedure RunTestContainerStable(container: DSequence);
-    procedure TestContainerStable(container: DSequence);
-    procedure TestStableContainerForIncreasingIntegers(container : DContainer);
+    function PairComparator(const Object1, Object2: DObject) : Integer;
+    procedure RunTestContainerStable(Container: DSequence);
+    procedure TestContainerStable(Container: DSequence);
+    procedure TestStableContainerForIncreasingIntegers(Container : DContainer);
   public
-    Constructor Create;
+    constructor Create;
   published
 
     [Test]
@@ -45,9 +44,11 @@ type
   end;
 
 implementation
+uses
+  System.SysUtils; // Format
 
 
-Constructor TTestSort.Create;
+constructor TTestSort.Create;
 begin
   FMaxRandomNumber := 1000;
   FTestCount := 1000;
@@ -61,41 +62,43 @@ begin
 end;
 
   // Type DComparator
-function TTestSort.IntegerComparator(const obj1, obj2 : DObject) : Integer;
+function TTestSort.IntegerComparator(const Object1, Object2 : DObject) : Integer;
 begin
-  Result := obj1.VInteger - obj2.VInteger;
+  Result := Object1.VInteger - Object2.VInteger;
 end;
 
-procedure TTestSort.TestContainerForIncreasingIntegers(container: DContainer);
-var smallest: Integer;
-var test: Integer;
-var iter: DIterator;
+procedure TTestSort.TestContainerForIncreasingIntegers(Container: DContainer);
+const ErrorOrder = '%s is not sorted because %d is smaller than %d';
+var Smallest: Integer;
+    Test: Integer;
+    Iter: DIterator;
 begin
-  smallest := 0;
-  iter := container.start;
-  while iterateOver(iter) do
+  Smallest := 0;
+  Iter := Container.start;
+  while IterateOver(Iter) do
   begin
-    test := getInteger(iter);
-    Assert.IsTrue((test - smallest) >= 0, Format('%s is not sorted because %d is smaller than %d', [container.ClassName, test, smallest]));
-    smallest := test;
+    Test := getInteger(Iter);
+    Assert.IsTrue((Test - Smallest) >= 0,
+        Format(ErrorOrder, [Container.ClassName, Test, Smallest]));
+    Smallest := Test;
   end;
 end;
 
-procedure TTestSort.RunTestContainer(container: DSequence);
+procedure TTestSort.RunTestContainer(Container: DSequence);
 begin
   try
-    TestContainer(container);
+    TestContainer(Container);
   finally
-    FreeAndNil(container);
+    FreeAndNil(Container);
   end;
 end;
 
-procedure TTestSort.TestContainer(container: DSequence);
+procedure TTestSort.TestContainer(Container: DSequence);
 begin
-  Generate(container, FTestCount, IntegerGenerator);
-  sort(container);
-  Assert.AreEqual(FTestCount, container.size, Format('%s has lost a member!', [container.ClassName]));
-  TestContainerForIncreasingIntegers(container);
+  generate(Container, FTestCount, IntegerGenerator);
+  sort(Container);
+  Assert.AreEqual(FTestCount, Container.size, Format('%s has lost a member!', [Container.ClassName]));
+  TestContainerForIncreasingIntegers(Container);
 end;
 
 procedure TTestSort.TestCanSortIntegerArray;
@@ -107,65 +110,69 @@ end;
 
   // DGeneratorProc
 function TTestSort.PairGenerator : DObject;
-var obj : PairItem;
+var Obj : TPairItem;
 begin
   Result.VType := vtObject;
-  obj := PairItem.Create;
-  obj.SortValue := Random(FMaxRandomNumber);
-  obj.Order := FIndex;
+  Obj := TPairItem.Create;
+  Obj.SortValue := Random(FMaxRandomNumber);
+  Obj.Order := FIndex;
   Inc(FIndex);
-  Result.VObject := obj;
+  Result.VObject := Obj;
 end;
 
   // Type DComparator
-function TTestSort.PairComparator(const obj1, obj2 : DObject) : Integer;
+function TTestSort.PairComparator(const Object1, Object2 : DObject) : Integer;
 begin
-  Result := (obj1.VObject as PairItem).SortValue - (obj2.VObject as PairItem).SortValue;
+  Result := (Object1.VObject as TPairItem).SortValue - (Object2.VObject as TPairItem).SortValue;
 end;
 
-procedure TTestSort.TestContainerStable(container: DSequence);
+procedure TTestSort.TestContainerStable(Container: DSequence);
 begin
   FIndex := 0;
-  Generate(container, FTestCount, PairGenerator);
-  stableSort(container);
-  Assert.AreEqual(FTestCount, container.size, Format('%s has lost a member!', [container.ClassName]));
-  TestStableContainerForIncreasingIntegers(container);
+  generate(Container, FTestCount, PairGenerator);
+  stablesort(Container);
+  Assert.AreEqual(FTestCount, Container.size, Format('%s has lost a member!', [Container.ClassName]));
+  TestStableContainerForIncreasingIntegers(Container);
 end;
 
-procedure TTestSort.TestStableContainerForIncreasingIntegers(container : DContainer);
-var smallest: Integer;
-var order: Integer;
-var obj: PairItem;
-var iter: DIterator;
+procedure TTestSort.TestStableContainerForIncreasingIntegers(Container : DContainer);
+const ErrorUnsorted = '%s is not sorted because %d is smaller than %d';
+      ErrorUnstable = '%s is unstable because order %d is smaller or equal to %d';
+var Smallest: Integer;
+    Order: Integer;
+    Obj: TPairItem;
+    Iter: DIterator;
 begin
-  smallest := -1;
-  order := -1;
-  iter := container.start;
-  while iterateOver(iter) do
+  Smallest := -1;
+  Order := -1;
+  Iter := Container.start;
+  while IterateOver(Iter) do
   begin
-    obj := getObject(iter) as PairItem;
+    Obj := getObject(Iter) as TPairItem;
       // SortValue must be greater or equal to smallest
-    Assert.IsTrue((obj.SortValue - smallest) >= 0, Format('%s is not sorted because %d is smaller than %d', [container.ClassName, obj.SortValue, smallest]));
+    Assert.IsTrue((Obj.SortValue - Smallest) >= 0,
+        Format(ErrorUnsorted, [Container.ClassName, Obj.SortValue, Smallest]));
       // if SortValue is equal to smallest, Order must be greater than order
-    if(obj.SortValue = smallest) then
+    if(Obj.SortValue = Smallest) then
     begin
-      Assert.IsTrue(obj.Order > order, Format('%s is unstable because order %d is smaller or equal to %d', [container.ClassName, obj.Order, order]));
-      order := obj.Order;
+      Assert.IsTrue(Obj.Order > Order,
+          Format(ErrorUnstable, [Container.ClassName, Obj.Order, Order]));
+      Order := Obj.Order;
     end
     else // reset order on new SortValue
-      order := 0;
+      Order := 0;
 
-    smallest := obj.SortValue;
+    Smallest := Obj.SortValue;
   end;
 end;
 
-procedure TTestSort.RunTestContainerStable(container: DSequence);
+procedure TTestSort.RunTestContainerStable(Container: DSequence);
 begin
   try
-    TestContainerStable(container);
+    TestContainerStable(Container);
   finally
-    ObjFree(container);
-    FreeAndNil(container);
+    objFree(Container);
+    FreeAndNil(Container);
   end;
 end;
 

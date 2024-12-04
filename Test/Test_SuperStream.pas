@@ -3,67 +3,61 @@
 interface
 
 uses
-  WinAPI.Windows,  // DeleteFile
-  System.SysUtils, // FileExists
   DeCAL,
-  DeCALIO,
-  SuperStream,
   DUnitX.TestFramework;
 
 type
   [TestFixture]
   TSuperStreamTest = class
   private
-    procedure FillContainerWithTestData(container: DContainer);
-    procedure VerifyContainerWithTestData(iter : DIterator);
+    procedure FillContainerWithTestData(Container: DContainer);
+    procedure VerifyContainerWithTestData(Iter : DIterator);
   public
-    [Setup]
-    procedure Setup;
     [TearDown]
     procedure TearDown;
 
     [Test]
     procedure TestCanWriteAndReadLongUnicodeStringsMap;
+
     [Test]
     procedure TestCanWriteAndReadLongUnicodeStringsArray;
   end;
 
 implementation
+uses
+  System.SysUtils, // FileExists
+  SuperStream;
 
-procedure TSuperStreamTest.FillContainerWithTestData(container: DContainer);
-var MyString : String;
-var i : Integer;
+procedure TSuperStreamTest.FillContainerWithTestData(Container: DContainer);
+var MyString: string;
+    i: Integer;
 begin
   for i := 1 to 1000 do
   begin
     MyString := Format('Test öäüÖÄÜß Nummer %d!', [i]);
 
-    // cannot use container.usesPairs because DMap obviously uses pairs but
+    // cannot use Container.usesPairs because DMap obviously uses pairs but
     // returns false. Changing this behavior however crashes most Map related
     // tests.
-    if container is DMap then
-      (container as DMap).putPair([i, MyString])
-    else if container is DArray then
-      (container as DArray).add([MyString])
+    if Container is DMap then
+      (Container as DMap).putPair([i, MyString])
+    else if Container is DArray then
+      (Container as DArray).add([MyString])
     else
       raise Exception.Create('TSuperStreamTest.FillContainerWithTestData can only fill DMap and DArray');
   end;
 end;
 
-procedure TSuperStreamTest.VerifyContainerWithTestData(iter : DIterator);
-var MyString : String;
-var i : Integer;
+procedure TSuperStreamTest.VerifyContainerWithTestData(Iter : DIterator);
+var MyString: string;
+    i: Integer;
 begin
   for i := 1 to 1000 do
   begin
     MyString := Format('Test öäüÖÄÜß Nummer %d!', [i]);
-    Assert.AreEqual(MyString, getString(iter));
-    Advance(iter);
+    Assert.AreEqual(MyString, getString(Iter));
+    advance(Iter);
   end;
-end;
-
-procedure TSuperStreamTest.Setup;
-begin
 end;
 
 procedure TSuperStreamTest.TearDown;
@@ -76,10 +70,9 @@ end;
 
 procedure TSuperStreamTest.TestCanWriteAndReadLongUnicodeStringsArray;
 var Arr      : DArray;
-var iter     : DIterator;
+    Iter     : DIterator;
 begin
   try
-
     Arr := DArray.Create;
     FillContainerWithTestData(Arr);
 
@@ -87,10 +80,9 @@ begin
     FreeAndNil(Arr);
 
     Arr := TObjStream.ReadObjectInFile('tempArray.ss', []) as DArray;
-    iter := Arr.start;
-    SetToValue(iter);
-    VerifyContainerWithTestData(iter);
-
+    Iter := Arr.start;
+    SetToValue(Iter);
+    VerifyContainerWithTestData(Iter);
   finally
     FreeAndNil(Arr);
   end;
@@ -98,7 +90,7 @@ end;
 
 procedure TSuperStreamTest.TestCanWriteAndReadLongUnicodeStringsMap;
 var Map      : DMap;
-var iter     : DIterator;
+    Iter     : DIterator;
 begin
   try
 
@@ -109,8 +101,8 @@ begin
     FreeAndNil(Map);
 
     Map := TObjStream.ReadObjectInFile('tempMap.ss', []) as DMap;
-    iter := Map.start;
-    VerifyContainerWithTestData(iter);
+    Iter := Map.start;
+    VerifyContainerWithTestData(Iter);
 
   finally
     FreeAndNil(Map);

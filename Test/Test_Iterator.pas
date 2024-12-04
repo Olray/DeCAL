@@ -11,8 +11,8 @@ type
   [TestFixture]
   TTestIterator = class(TTestCase)
   private
-    function IsOddInteger(const obj : DObject) : Boolean;
-    function IsEvenInteger(const obj: DObject) : Boolean;
+    function IsOddInteger(const Obj : DObject) : Boolean;
+    function IsEvenInteger(const Obj: DObject) : Boolean;
   published
     [Test]
     procedure Test_DIterFilter;
@@ -27,74 +27,69 @@ implementation
 
 { TTestIterator }
 
-function TTestIterator.IsOddInteger(const obj : DObject) : Boolean;
+function TTestIterator.IsOddInteger(const Obj : DObject) : Boolean;
 begin
-  Result := not IsEvenInteger(obj);
+  Result := not IsEvenInteger(Obj);
 end;
 
-function TTestIterator.IsEvenInteger(const obj: TVarRec): Boolean;
+function TTestIterator.IsEvenInteger(const Obj: TVarRec): Boolean;
 begin
-  Result := (obj.VInteger MOD 2 = 0);
+  Result := (Obj.VInteger mod 2 = 0);
 end;
 
 procedure TTestIterator.Test_DIterFilter;
-var c1 : DArray;
-var iter : DIterator;
-var IterFilter : DIterFilter;
+var Container1 : DArray;
+    iter : DIterator;
+    IterFilter : DIterFilter;
 begin
-  c1 := DArray.Create;
+  Container1 := DArray.Create;
   try
       // add numbers 1-100 to container
-    for var temp := 1 to 100 do
-      c1.add([temp]);
+    for var i := 1 to 100 do
+      Container1.add([i]);
 
-    iter := c1.start;
+    iter := Container1.start;
     IterFilter := DIterFilter.Create(iter, IsOddInteger);
     try
       iter.Handler := IterFilter;
 
         // should only return odd numbers
-      while iterateOver(iter) do
-      begin
-        var test := getInteger(iter);
-        Assert.AreEqual(1, test MOD 2);
-      end;
+      while IterateOver(iter) do
+        Assert.AreEqual(1, getInteger(iter) mod 2);
 
     finally
       IterFilter.Free;
     end;
   finally
-    c1.Free;
+    Container1.Free;
   end;
 end;
 
 procedure TTestIterator.Test_DIterSkipper;
-var c1 : DArray;
-var iter : DIterator;
-var IterSkipper : DIterSkipper;
+var Container1 : DArray;
+    iter : DIterator;
+    IterSkipper : DIterSkipper;
 begin
-  c1 := DArray.Create;
+  Container1 := DArray.Create;
   try
       // add numbers 1-100 to container
-    for var temp := 1 to 100 do
-      c1.add([temp]);
+    for var i := 1 to 100 do
+      Container1.add([i]);
 
-    iter := c1.start;
+    iter := Container1.start;
     IterSkipper := DIterSkipper.Create(iter, 2);
     try
       iter.Handler := IterSkipper;
 
         // should only return odd numbers
-      while iterateOver(iter) do
-      begin
-        var test := getInteger(iter);
-        Assert.AreEqual(1, test MOD 2);
-      end;
+      while IterateOver(iter) do
+        Assert.AreEqual(1, getInteger(iter) mod 2);
+
     finally
       IterSkipper.Free;
     end;
   finally
-    c1.Free;
+    Container1.Free;
   end;
 end;
 

@@ -3,17 +3,14 @@ unit Test_RandomTesting;
 interface
 
 uses
-  System.SysUtils,
   TestFramework,
   DUnitX.TestFramework,
   DeCAL;
 
 const Executions = 100;
-const Cycles = 10;
+      Cycles = 10;
 
 type
-  TOperation = (opAdd, opRemove, opClear, opFind);
-
   [TestFixture]
   TTestRandomTesting = class(TTestCase)
   private
@@ -21,26 +18,39 @@ type
     FSequenceClasses : DArray;
     FSetClasses : DArray;
     FMapClasses : DArray;
-    function verifyTreeNodeRuleNOTRR(node: DTreeNode): boolean;
-    function getLeafNodeBlackCount(tree: DRedBlackTree; treeNode: DTreeNode): Integer;
-    function isLeaf(treeNode: DTreeNode): boolean;
+      // test red-black tree
+    function VerifyTreeNodeRuleNOTRR(Node: DTreeNode): Boolean;
+    function GetLeafNodeBlackCount(Tree: DRedBlackTree; TreeNode: DTreeNode): Integer;
+    function IsLeaf(TreeNode: DTreeNode): Boolean;
+      // test containers
+    procedure AddValuesToContainers(Container1, Container2: DContainer);
+    procedure AddValuesToContainersAssoc(Container1, Container2: DAssociative);
+    procedure RemoveValuesFromContainers(Container1, Container2: DContainer);
+    procedure FindInContainers(Container1, Container2: DContainer);
+    procedure ClearContainers(Container1, Container2: DContainer);
+    procedure CompareContainerContents(Container1, Container2: DContainer);
+
   public
-    Constructor Create;
-    Destructor Destroy; override;
+    constructor Create;
+    destructor Destroy; override;
   published
 
     [Test]
     procedure Test_Special;
+
     [Test]
     procedure Test_MapTesting;
+
     [Test]
     procedure Test_ContainerTesting;
   end;
 
 implementation
+uses
+  System.SysUtils;
 
 
-Constructor TTestRandomTesting.Create;
+constructor TTestRandomTesting.Create;
 begin
   FContainerClasses := DArray.Create;
   FSequenceClasses := DArray.Create;
@@ -53,271 +63,224 @@ begin
   FMapClasses.add([DMap, DHashMap]);
 end;
 
-Destructor TTestRandomTesting.Destroy;
+destructor TTestRandomTesting.Destroy;
 begin
   FreeAll([FContainerClasses, FSequenceClasses, FSetClasses, FMapClasses]);
+  inherited;
 end;
 
-function TTestRandomTesting.verifyTreeNodeRuleNOTRR(node: DTreeNode) : boolean;
+function TTestRandomTesting.VerifyTreeNodeRuleNOTRR(Node: DTreeNode) : Boolean;
 begin
-  Result := true;
-  if(node.color = tnfRed) then
+  Result := True;
+  if(Node.color = tnfRed) then
   begin
-    if(node.left <> nil_node) and (node.left.color = tnfRed) then
-      Exit(false);
-    if(node.right <> nil_node) and (node.right.color = tnfRed) then
-      Exit(false);
+    if(Node.left <> nil_node) and (Node.left.color = tnfRed) then
+      Exit(False);
+    if(Node.right <> nil_node) and (Node.right.color = tnfRed) then
+      Exit(False);
   end;
 end;
 
-function TTestRandomTesting.isLeaf(treeNode: DTreeNode): boolean;
+function TTestRandomTesting.IsLeaf(TreeNode: DTreeNode): Boolean;
 begin
-  Result := (treeNode.left = nil_node) or (treeNode.right = nil_node);
+  Result := (TreeNode.left = nil_node) or (TreeNode.right = nil_node);
 end;
 
-function TTestRandomTesting.getLeafNodeBlackCount(tree: DRedBlackTree; treeNode: DTreeNode): Integer;
-var node : DTreeNode;
-var header : DTreeNode;
+function TTestRandomTesting.GetLeafNodeBlackCount(Tree: DRedBlackTree; TreeNode: DTreeNode): Integer;
+var Node : DTreeNode;
+    Header : DTreeNode;
 begin
   Result := 0;
-  header := tree.getHeader;
-  node := treeNode;
+  Header := Tree.getHeader;
+  Node := TreeNode;
   repeat
-    if(node.color = tnfBlack) then Inc(Result);
-    node := node.parent;
-  until(node = header);
+    if(Node.color = tnfBlack) then Inc(Result);
+    Node := Node.parent;
+  until(Node = Header);
 end;
 
-procedure TTestRandomTesting.Test_ContainerTesting;
-var exec, cycle : Integer;
-    cls : DContainerClass;
-    con1, con2 : DContainer;
-    value, test, count : Integer;
-    iter1, iter2 : DIterator;
-    v1,v2, diff : DArray;
-    scenarioNumber : Integer;
+const ErrorStr = 'Container sizes not the same (case %d: (%d, %d) items)';
+
+procedure TTestRandomTesting.AddValuesToContainers(Container1, Container2 : DContainer);
+var i: Integer;
+    Value: Integer;
+    Count: Integer;
 begin
+  Count := Random(100);
+  for i := 1 to Count do
+  begin
+    Value := Random(1000);
+    Container1.add([Value]);
+    Container2.add([Value]);
+    Assert.AreEqual(Container1.size, Container2.size,
+        Format(ErrorStr, [0, Container1.size, Container2.size]));
+  end;
+end;
 
-  v1 := DArray.Create;
-  v2 := DArray.Create;
-  diff := Darray.Create;
+procedure TTestRandomTesting.AddValuesToContainersAssoc(Container1, Container2 : DAssociative);
+var i: Integer;
+    Value: Integer;
+    Count: Integer;
+begin
+  Count := Random(100);
+  for i := 1 to Count do
+  begin
+    Value := Random(1000);
+    Container1.putPair([Value, Value]);
+    Container2.putPair([Value, Value]);
+    Assert.AreEqual(Container1.size, Container2.size,
+        Format(ErrorStr, [0, Container1.size, Container2.size]));
+  end;
+end;
 
-  for exec := 1 to Executions do
+procedure TTestRandomTesting.RemoveValuesFromContainers(Container1, Container2 : DContainer);
+var i: Integer;
+    Value: Integer;
+    Count: Integer;
+begin
+  Count := Random(100);
+  for i := 1 to Count do
+  begin
+    Value := Random(1000);
+    Container1.remove([Value]);
+    Container2.remove([Value]);
+    Assert.AreEqual(Container1.size, Container2.size,
+        Format(ErrorStr, [0, Container1.size, Container2.size]));
+  end;
+end;
+
+procedure TTestRandomTesting.FindInContainers(Container1, Container2 : DContainer);
+var i: Integer;
+    Value: Integer;
+    Count: Integer;
+    Iter1, Iter2: DIterator;
+begin
+  Count := Random(100);
+  for i := 1 to Count do
+  begin
+    Value := Random(1000);
+    Iter1 := find(Container1, [Value]);
+    Iter2 := find(Container2, [Value]);
+
+    if not atEnd(Iter1) then
+      Assert.AreEqual(Value, getInteger(Iter1),
+          Format('Error: case %d-1 find returned %d instead of %d in class (%s)',
+            [3, getInteger(Iter1), Value, Container1.ClassName]));
+
+    if not atEnd(Iter2) then
+      Assert.AreEqual(Value, getInteger(Iter2),
+          Format('Error: case %d-1 find returned %d instead of %d in class (%s)',
+            [3, getInteger(Iter2), Value, Container2.ClassName]));
+  end;
+end;
+
+procedure TTestRandomTesting.ClearContainers(Container1: DContainer; Container2: DContainer);
+begin
+  Container1.clear;
+  Container2.clear;
+end;
+
+procedure TTestRandomTesting.CompareContainerContents(Container1, Container2: DContainer);
+var SortableContainer1,
+    SortableContainer2,
+    DifferenceContainer : DArray;
+begin
+  SortableContainer1 := DArray.Create;
+  SortableContainer2 := DArray.Create;
+  DifferenceContainer := DArray.Create;
+
+      // Verify that they're the same.
+  Assert.AreEqual(Container1.size, Container2.size,
+      Format('Container sizes are different: %s, %s', [Container1.ClassName, Container2.ClassName]));
+
+    // Verify they contain the same stuff.
+
+  copyContainer(Container1, SortableContainer1);
+  Assert.AreEqual(Container1.size, SortableContainer1.size,
+      Format('Error: CopyContainer %s(Container1)->SortableContainer1', [Container1.ClassName]));
+
+  copyContainer(Container2, SortableContainer2);
+  Assert.AreEqual(Container2.size, SortableContainer2.size,
+      Format('Error: CopyContainer %s(Container2)->SortableContainer2', [Container2.ClassName]));
+
+  sort(SortableContainer1);
+  sort(SortableContainer2);
+  Assert.AreEqual(SortableContainer1.size, SortableContainer2.size,
+      'Error: Containers lost items while sorting');
+
+  setSymmetricDifference(SortableContainer1, SortableContainer2, DifferenceContainer.finish);
+  Assert.IsFalse(DifferenceContainer.size > 0,
+      Format('%d differences found: (%s %s)',
+        [DifferenceContainer.size, Container1.ClassName, Container2.ClassName]));
+
+  FreeAll([SortableContainer1, SortableContainer2, DifferenceContainer]);
+end;
+
+
+procedure TTestRandomTesting.Test_ContainerTesting;
+var Exec, Cycle : Integer;
+    Cls : DContainerClass;
+    Container1, Container2 : DContainer;
+begin
+  for Exec := 1 to Executions do
     begin
         // Randomly choose two container classes
-      RandomShuffle(FContainerClasses);
+      randomShuffle(FContainerClasses);
 
-      cls := DContainerClass(FContainerClasses.atAsClass(0));
-      con1 := cls.Create;
-      cls := DContainerClass(FContainerClasses.atAsClass(1));
-      con2 := cls.Create;
+      Cls := DContainerClass(FContainerClasses.atAsClass(0));
+      Container1 := Cls.Create;
+      Cls := DContainerClass(FContainerClasses.atAsClass(1));
+      Container2 := Cls.Create;
 
-      for cycle := 1 to cycles do
-        begin
-          scenarioNumber := exec * cycles + cycle;
-
-          case Random(4) of
-            0:
-              begin
-                count := Random(100);
-                for test := 1 to count do
-                begin
-                  value := Random(1000);
-                  con1.add([value]);
-                  con2.add([value]);
-                  Assert.AreEqual(con1.size, con2.size, Format('Error: %d case %d', [scenarioNumber, 0]));
-                end;
-              end;
-            1:
-              begin
-                count := Random(100);
-                for test := 1 to count do
-                begin
-                  value := Random(1000);
-                  con1.remove([value]);
-                  con2.remove([value]);
-
-                  Assert.AreEqual(con1.size, con2.size, Format('Error: %d case %d', [scenarioNumber, 1]));
-
-                end;
-              end;
-            2:
-              begin
-                con1.clear;
-                con2.clear;
-              end;
-            3:
-              begin
-                count := Random(100);
-                for test := 1 to count do
-                  begin
-                    value := Random(1000);
-                    iter1 := find(con1, [value]);
-                    iter2 := find(con2, [value]);
-
-                    if not atEnd(iter1) then
-                    begin
-                      var csize := con1.size;
-                      if (getInteger(iter1) <> value) then
-                      begin
-                        var iter := find(con1, [value]);
-                        var newValue := getInteger(iter);
-                      end;
-                      Assert.AreEqual(value, getInteger(iter1), Format('Error: %d case %d-1 find returned %d instead of %d in class (%s)', [scenarioNumber, 3, getInteger(iter1), value, con1.ClassName]));
-                    end;
-
-                    if not atEnd(iter2) then
-                    begin
-                      var csize := con2.size;
-                      if (getInteger(iter2) <> value) then
-                      begin
-                        var iter := find(con2, [value]);
-                        var newValue := getInteger(iter);
-                      end;
-                      Assert.AreEqual(value, getInteger(iter2), Format('Error: %d case %d-1 find returned %d instead of %d in class (%s)', [scenarioNumber, 3, getInteger(iter2), value, con2.ClassName]));
-                    end;
-//                    Assert.AreEqual(atEnd(iter1), atEnd(iter2), Format('Error: %d case %d-1 (%s %s)', [scenarioNumber, 3, con1.ClassName, con2.ClassName]));
-//                    if not atEnd(iter1) then
-//                      Assert.AreEqual(getInteger(iter1), getInteger(iter2), Format('Error: %d case %d-2', [scenarioNumber, 3]));
-                  end;
-              end;
-
-          end;
-
-            // Verify that they're the same.
-          Assert.AreEqual(con1.size, con2.size, Format('Container sizes are different: %d', [scenarioNumber]));
-
-            // Verify they contain the same stuff.
-          v1.Clear;
-          v2.Clear;
-          diff.Clear;
-
-          CopyContainer(con1, v1);
-          Assert.AreEqual(con1.size, v1.size, Format('Error: %d CopyContainer con1->v1', [scenarioNumber]));
-
-          CopyContainer(con2, v2);
-          Assert.AreEqual(con2.size, v2.size, Format('Error: %d CopyContainer con2->v2', [scenarioNumber]));
-
-          sort(v1);
-          sort(v2);
-          Assert.AreEqual(v1.size, v2.size, Format('Error: %d Lost items while sorting', [scenarioNumber]));
-
-          setSymmetricDifference(v1, v2, diff.finish);
-          Assert.IsFalse(diff.size > 0, Format('Difference found: %d differences %d (%s %s)', [diff.size, scenarioNumber, con1.ClassName, con2.ClassName]));
-
+      for Cycle := 1 to Cycles do
+      begin
+        case Random(4) of
+          0: AddValuesToContainers(Container1, Container2);
+          1: RemoveValuesFromContainers(Container1, Container2);
+          2: ClearContainers(Container1, Container2);
+          3: FindInContainers(Container1, Container2);
         end;
 
-      FreeAll([con1, con2]);
-    end;
+        CompareContainerContents(Container1, Container2);
 
-  FreeAll([v1, v2, diff]);
+      end;
+
+      FreeAll([Container1, Container2]);
+    end;
 
 end;
 
 procedure TTestRandomTesting.Test_MapTesting;
-var exec, cycle : Integer;
-    cls : DAssociativeClass;
-    con1, con2 : DAssociative;
-    value, test, count : Integer;
-    iter1, iter2 : DIterator;
-    v1,v2, diff : DArray;
-    scenarioNumber : Integer;
+var Exec, Cycle : Integer;
+    Cls : DAssociativeClass;
+    Container1, Container2 : DAssociative;
 begin
 
-  v1 := DArray.Create;
-  v2 := DArray.Create;
-  diff := Darray.Create;
+  for Exec := 1 to Executions do
+  begin
 
-  for exec := 1 to Executions do
+    // Randomly choose two container classes
+    randomShuffle(FMapClasses);
+
+    Cls := DAssociativeClass(FMapClasses.atAsClass(0));
+    Container1 := Cls.Create;
+    Cls := DAssociativeClass(FMapClasses.atAsClass(1));
+    Container2 := Cls.Create;
+
+    for Cycle := 1 to Cycles do
     begin
-
-      // Randomly choose two container classes
-      RandomShuffle(FMapClasses);
-
-      cls := DAssociativeClass(FMapClasses.atAsClass(0));
-      con1 := cls.Create;
-      cls := DAssociativeClass(FMapClasses.atAsClass(1));
-      con2 := cls.Create;
-
-      for cycle := 1 to cycles do
-      begin
-
-        scenarioNumber := exec * cycles + cycle;
-
-        case Random(4) of
-          0:
-            begin
-              count := Random(100);
-              for test := 1 to count do
-                begin
-                  value := Random(1000);
-
-                  con1.putPair([value, value]);
-                  con2.putPair([value, value]);
-
-                  Assert.AreEqual(con1.size, con2.size, Format('Error: %d %d', [scenarioNumber, test]));
-                end;
-            end;
-          1:
-            begin
-              count := Random(100);
-              for test := 1 to count do
-                begin
-                  // happens on iteration 30?
-                  value := Random(1000);
-
-                  con1.remove([value]);
-                  con2.remove([value]);
-
-                  Assert.AreEqual(con1.size, con2.size, Format('Error: %d case %d', [scenarioNumber, 1]));
-
-                end;
-            end;
-          2:
-            begin
-              con1.clear;
-              con2.clear;
-            end;
-          3:
-            begin
-              count := Random(100);
-              for test := 1 to count do
-                begin
-                  value := Random(1000);
-                  iter1 := find(con1, [value]);
-                  iter2 := find(con2, [value]);
-                  Assert.AreEqual(atEnd(iter1), atEnd(iter2), Format('Error: %d case %d', [scenarioNumber, 3]));
-                end;
-            end;
-
-        end;
-
-        // Verify that they're the same.
-        Assert.AreEqual(con1.size, con2.size, Format('Container sizes are different: %d', [scenarioNumber]));
-
-        // Verify they contain the same stuff.
-        v1.Clear;
-        v2.Clear;
-        diff.Clear;
-
-        CopyContainer(con1, v1);
-        Assert.AreEqual(con1.size, v1.size, Format('Error: %d CopyContainer con1->v1', [scenarioNumber]));
-
-        CopyContainer(con2, v2);
-        Assert.AreEqual(con2.size, v2.size, Format('Error: %d CopyContainer con2->v2', [scenarioNumber]));
-
-        sort(v1);
-        sort(v2);
-        Assert.AreEqual(v1.size, v2.size, Format('Error: %d Lost items while sorting', [scenarioNumber]));
-
-        setSymmetricDifference(v1, v2, diff.finish);
-        Assert.IsFalse(diff.size > 0, Format('Difference found: %d differences %d', [diff.size, scenarioNumber]));
+      case Random(4) of
+        0: AddValuesToContainersAssoc(Container1, Container2);
+        1: RemoveValuesFromContainers(Container1, Container2);
+        2: ClearContainers(Container1, Container2);
+        3: FindInContainers(Container1, Container2);
       end;
-
-      FreeAll([con1, con2]);
     end;
 
-  FreeAll([v1, v2, diff]);
+    CompareContainerContents(Container1, Container2);
+
+    FreeAll([Container1, Container2]);
+  end;
 
 end;
 
@@ -327,7 +290,7 @@ end;
   O(log n) for search, insert, and delete operations.
   See: https://en.wikipedia.org/wiki/Red%E2%80%93black_tree
   The original "test" simply generated a couple of temporary files that
-  contained the red/black value of every node in the tree. The purpose of this
+  contained the red/black value of every Node in the tree. The purpose of this
   test was to verify correctness of the red-black tree implementation.
   However, there were no verification rules present in the original testing
   unit so Ross Judson must have had some external tool to verify correctness of
@@ -340,22 +303,22 @@ end;
 }
 procedure TTestRandomTesting.Test_Special;
 
-  procedure AssertAllSame(arr: DArray);
-  var iter: DIterator;
-  var treeHeight: Integer;
+  procedure AssertAllSame(Arr: DArray);
+  var Iter: DIterator;
+      TreeHeight: Integer;
   begin
-    iter := arr.start;
-    treeHeight := getInteger(iter);
-    while(iterateOver(iter)) do
-      Assert.AreEqual(treeHeight, getInteger(iter));
+    Iter := Arr.start;
+    TreeHeight := getInteger(Iter);
+    while IterateOver(Iter) do
+      Assert.AreEqual(TreeHeight, getInteger(Iter));
   end;
 
-var map : DMap;
+var Map : DMap;
     i : Integer;
-    iter : DIterator;
-var treeHeights : DArray;
+    Iter : DIterator;
+    TreeHeights : DArray;
 begin
-  var puts := [
+  var Puts := [
     866, 208, 669, 847, 14 , 917, 558, 494, 617, 660, 372, 297, 508, 542,
     44 , 739, 904, 368, 20 , 869, 942, 55 , 741, 942, 823, 997, 913, 908,
     203, 743, 328, 744, 781, 595, 311, 855, 236, 996, 72 , 27 , 944, 802,
@@ -364,52 +327,52 @@ begin
     606, 933, 491, 810, 800, 822, 982, 758, 414, 258, 38 , 596, 241, 858,
     709, 101, 589, 0  , 870, 370, 238];
 
-  var removes := [
+  var Removes := [
     722, 845, 113, 262, 980, 334, 723, 18 , 658, 74 , 445, 988, 623, 108,
     714, 243, 490, 521, 855, 617, 182, 493, 249, 201, 861, 80 , 208, 423,
     738, 487, 241];
 
-  map := DMap.Create;
+  Map := DMap.Create;
 
-  for i := Low(puts) to High(puts) do
+  for i := Low(Puts) to High(Puts) do
   begin
-    map.putPair([puts[i], puts[i]]);
+    Map.putPair([Puts[i], Puts[i]]);
 
-    treeHeights := DArray.Create;
-    iter := map.start;
-    while iterateOver(iter) do
+    TreeHeights := DArray.Create;
+    Iter := Map.start;
+    while IterateOver(Iter) do
     begin
-      Assert.IsTrue(verifyTreeNodeRuleNOTRR(iter.treeNode));
+      Assert.IsTrue(VerifyTreeNodeRuleNOTRR(Iter.treeNode));
 
-      if isLeaf(iter.treeNode) then
-        treeHeights.add([getLeafNodeBlackCount(iter.tree, iter.treeNode)]);
+      if IsLeaf(Iter.treeNode) then
+        TreeHeights.add([GetLeafNodeBlackCount(Iter.tree, Iter.treeNode)]);
     end;
       // treeHeight must contain all the same values for rule S#=
-    AssertAllSame(treeHeights);
-    treeHeights.Free;
+    AssertAllSame(TreeHeights);
+    TreeHeights.Free;
 
   end;
 
-  for i := Low(removes) to High(removes) do
+  for i := Low(Removes) to High(Removes) do
   begin
-    map.remove([removes[i]]);
+    Map.remove([Removes[i]]);
 
-    treeHeights := DArray.Create;
-    iter := map.start;
-    while iterateOver(iter) do
+    TreeHeights := DArray.Create;
+    Iter := Map.start;
+    while IterateOver(Iter) do
     begin
-      Assert.IsTrue(verifyTreeNodeRuleNOTRR(iter.treeNode));
+      Assert.IsTrue(VerifyTreeNodeRuleNOTRR(Iter.treeNode));
 
-      if isLeaf(iter.treeNode) then
-        treeHeights.add([getLeafNodeBlackCount(iter.tree, iter.treeNode)]);
+      if IsLeaf(Iter.treeNode) then
+        TreeHeights.add([GetLeafNodeBlackCount(Iter.tree, Iter.treeNode)]);
     end;
       // treeHeight must contain all the same values for rule S#=
-    AssertAllSame(treeHeights);
-    treeHeights.Free;
+    AssertAllSame(TreeHeights);
+    TreeHeights.Free;
 
   end;
 
-  map.free;
+  Map.Free;
 
 end;
 

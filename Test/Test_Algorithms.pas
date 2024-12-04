@@ -3,7 +3,6 @@ unit Test_Algorithms;
 interface
 
 uses
-  System.SysUtils, // Format
   TestFramework,
   DUnitX.TestFramework,
   DeCAL;
@@ -13,9 +12,9 @@ type
   TTestAlgorithms = class(TTestCase)
   private
     FSum: Integer;
-    function IsEvenInteger(const obj : DObject) : Boolean;
-    procedure AddValueToMemberVar(const obj: DObject); // DApply
-    function CalcSum(const obj1, obj2 : DObject): DObject; // DBinary
+    function IsEvenInteger(const Obj : DObject) : Boolean;
+    procedure AddValueToMemberVar(const Obj: DObject); // DApply
+    function CalcSum(const Obj, Obj2 : DObject): DObject; // DBinary
   published
     // 2024-10-27 Reported by Doug Winsby
     [Test]
@@ -26,6 +25,8 @@ type
   end;
 
 implementation
+uses
+  System.SysUtils; // Format
 
 {
   From the documentation:
@@ -44,93 +45,92 @@ implementation
 }
 
   // Type DTest
-function TTestAlgorithms.IsEvenInteger(const obj : DObject) : Boolean;
+function TTestAlgorithms.IsEvenInteger(const Obj : DObject) : Boolean;
 begin
-  Result := (obj.VInteger MOD 2 = 0);
+  Result := (Obj.VInteger mod 2 = 0);
 end;
 
 procedure TTestAlgorithms.TestRemoveCopyIfIn;
-var c1, c2 : DArray;
-var i : DIterator;
+var Container1, Container2 : DArray;
+    iter : DIterator;
 begin
-  c1 := DArray.Create;
+  Container1 := DArray.Create;
   try
       // add numbers 1-100 to container
-    for var temp := 1 to 100 do
-      c1.add([temp]);
+    for var i := 1 to 100 do
+      Container1.add([i]);
 
-    c2 := DArray.Create;
+    Container2 := DArray.Create;
     try
-        // copy container to c2 except even numbers
-      i := removeCopyIfIn(c1.start, c1.finish, c2.finish, IsEvenInteger);
+        // copy container to Container2 except even numbers
+      iter := removeCopyIfIn(Container1.start, Container1.finish, Container2.finish, IsEvenInteger);
 
         // expected results:
 
         // removeCopyIfIn returns iterator at end of new sequence
-      Assert.AreEqual(true, atEnd(i));
+      Assert.AreEqual(True, atEnd(iter));
         // last odd number in new sequence must be 99
-      advanceBy(i, -1);
-      Assert.AreEqual(99, getInteger(i));
+      advanceBy(iter, -1);
+      Assert.AreEqual(99, getInteger(iter));
         // still 100 items in source container
-      Assert.AreEqual(100, c1.size);
+      Assert.AreEqual(100, Container1.size);
         // half of the amount in target container
-      Assert.AreEqual(50, c2.size);
+      Assert.AreEqual(50, Container2.size);
 
         // check if all objects in new container are odd numbers
-      i := c2.start;
-      while(iterateOver(i)) do
-      begin
-        var n := getInteger(i);
-        Assert.IsFalse(n MOD 2 = 0);
-      end;
+      iter := Container2.start;
+      while IterateOver(iter) do
+        Assert.IsFalse(getInteger(iter) mod 2 = 0);
 
     finally
-      c2.Free;
+      Container2.Free;
     end;
 
   finally
-  c1.Free;
+  Container1.Free;
   end;
 end;
 
 
 procedure TTestAlgorithms.TestApply;
-const n = 200;
+const TestCount = 200;
 var i: Integer;
-var iter: DIterator;
-var arr: DArray;
-var sum: DObject;
-var expected: Integer;
+    Arr: DArray;
+    Sum: DObject;
+    Expected: Integer;
 begin
-  arr := DArray.Create;
+  Arr := DArray.Create;
   try
-    for i := 1 to n do
-      arr.add([i]);
-    expected := (n*(n+1)) div 2;
+    for i := 1 to TestCount do
+      Arr.add([i]);
+    Expected := (TestCount*(TestCount+1)) div 2;
 
-    sum := inject(arr, [0], CalcSum);
-    Assert.AreEqual(expected, sum.VInteger, Format('Wrong sum calculated with inject. Expected: %d, received: %d', [expected, sum.VInteger]));
+    Sum := inject(Arr, [0], CalcSum);
+    Assert.AreEqual(Expected, Sum.VInteger,
+        Format('Wrong sum calculated with inject. Expected: %d, received: %d', [Expected, Sum.VInteger]));
       // modify start value and try again
-    sum := inject(arr, [1], CalcSum);
-    Assert.AreEqual(expected+1, sum.VInteger, Format('Wrong sum calculated with inject. Expected: %d, received: %d', [expected+1, sum.VInteger]));
+    Sum := inject(Arr, [1], CalcSum);
+    Assert.AreEqual(Expected+1, Sum.VInteger,
+        Format('Wrong sum calculated with inject. Expected: %d, received: %d', [Expected+1, Sum.VInteger]));
 
     FSum := 0;
-    forEach(arr, AddValueToMemberVar);
-    Assert.AreEqual(expected, FSum, Format('Wrong sum calculated with forEach. Expected: %d, received: %d', [expected, FSum]));
+    forEach(Arr, AddValueToMemberVar);
+    Assert.AreEqual(Expected, FSum,
+        Format('Wrong sum calculated with forEach. Expected: %d, received: %d', [Expected, FSum]));
 
   finally
-    FreeAndNil(arr);
+    FreeAndNil(Arr);
   end;
 end;
 
-procedure TTestAlgorithms.AddValueToMemberVar(const obj: DObject);
+procedure TTestAlgorithms.AddValueToMemberVar(const Obj: DObject);
 begin
-  FSum := FSum + obj.VInteger;
+  FSum := FSum + Obj.VInteger;
 end;
 
-function TTestAlgorithms.CalcSum(const obj1, obj2 : DObject): DObject;
+function TTestAlgorithms.CalcSum(const Obj, Obj2 : DObject): DObject;
 begin
-  Result.VInteger := obj1.VInteger + obj2.VInteger;
+  Result.VInteger := Obj.VInteger + Obj2.VInteger;
 end;
 
 initialization

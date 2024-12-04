@@ -4,36 +4,36 @@ interface
 
 type
   IDeCALTestInterface = interface
-    Function getIdentifier : Integer;
+    function GetIdentifier : Integer;
   end;
 
   TDecalMockClassSimple = class
   private
     FIdentifier : Integer;
   public
-    Constructor Create(SomeIdentifier : Integer);
-    Function getIdentifier : Integer;
+    constructor Create(SomeIdentifier : Integer);
+    function GetIdentifier : Integer;
   end;
 
   TDecalInterfacedClass = class(TInterfacedObject, IDeCALTestInterface)
-    function getIdentifier : Integer;
+    function GetIdentifier : Integer;
   end;
 
 implementation
 
 
-Constructor TDecalMockClassSimple.Create(SomeIdentifier : Integer);
+constructor TDecalMockClassSimple.Create(SomeIdentifier : Integer);
 begin
   FIdentifier := SomeIdentifier;
   inherited Create;
 end;
 
-function TDecalMockClassSimple.getIdentifier : Integer;
+function TDecalMockClassSimple.GetIdentifier : Integer;
 begin
-  result := FIdentifier;
+  Result := FIdentifier;
 end;
 
-function TDecalInterfacedClass.getIdentifier: Integer;
+function TDecalInterfacedClass.GetIdentifier: Integer;
 begin
   Result := 4711;
 end;

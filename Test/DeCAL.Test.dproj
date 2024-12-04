@@ -96,20 +96,20 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Test_Map.pas"/>
+        <DCCReference Include="..\DeCAL.pas"/>
+        <DCCReference Include="..\DeCALIO.pas"/>
+        <DCCReference Include="..\SuperStream.pas"/>
+        <DCCReference Include="..\mwFixedRecSort.pas"/>
         <DCCReference Include="DeCAL.MockClasses.pas"/>
+        <DCCReference Include="DeCAL.MockData.pas"/>
+        <DCCReference Include="Test_Map.pas"/>
         <DCCReference Include="Test_SuperStream.pas"/>
         <DCCReference Include="Test_Regress.pas"/>
         <DCCReference Include="Test_Transformations.pas"/>
-        <DCCReference Include="DeCAL.MockData.pas"/>
         <DCCReference Include="Test_Algorithms.pas"/>
         <DCCReference Include="Test_Sort.pas"/>
-        <DCCReference Include="..\DeCAL.pas"/>
         <DCCReference Include="Test_Iterator.pas"/>
         <DCCReference Include="Test_RandomTesting.pas"/>
-        <DCCReference Include="..\mwFixedRecSort.pas"/>
-        <DCCReference Include="..\DeCALIO.pas"/>
-        <DCCReference Include="..\SuperStream.pas"/>
         <DCCReference Include="Test_Clone.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

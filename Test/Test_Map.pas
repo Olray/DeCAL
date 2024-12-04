@@ -3,110 +3,99 @@
 interface
 
 uses
-  DeCAL,
-  DeCAL.MockClasses,
   DUnitX.TestFramework;
 
 type
   [TestFixture]
   TDecalMapTest = class
   private
-    procedure NilWithoutFree(VAR obj : Pointer);
+    procedure NilWithoutFree(var Obj : Pointer);
   public
-    [Setup]
-    procedure Setup;
-    [TearDown]
-    procedure TearDown;
 
     [Test]
     procedure TestCanStoreAndRetriveSimpleTypes;
+
     [Test]
     procedure TestCanStoreAndRetriveObjects;
+
     [Test]
     procedure TestCanStoreAndRetriveInterfaces;
   end;
 
 implementation
-
-procedure TDecalMapTest.Setup;
-begin
-end;
-
-procedure TDecalMapTest.TearDown;
-begin
-end;
+uses
+  DeCAL,
+  DeCAL.MockClasses;
 
 // This function suppresses compiler warning H2077 (value never used)
-procedure TDecalMapTest.NilWithoutFree(var obj: Pointer);
+procedure TDecalMapTest.NilWithoutFree(var Obj: Pointer);
 begin
-  obj := NIL;
+  Obj := nil;
 end;
 
 procedure TDecalMapTest.TestCanStoreAndRetriveSimpleTypes;
-var map : DMap;
-var MockAnsiString : AnsiString;
-var iter : DIterator;
+var Map : DMap;
+    MockAnsiString : AnsiString;
+    iter : DIterator;
 begin
-  map := NIL;
+  Map := DMap.Create;
   try
-    map := DMap.Create;
-    map.putPair([1, 100]);
-    map.putPair([2, 'A Wide String']);
-    map.putPair([3, 3.1415]);
+    Map.putPair([1, 100]);
+    Map.putPair([2, 'A Wide String']);
+    Map.putPair([3, 3.1415]);
     MockAnsiString := 'An Ansi String';
-    map.putPair([4, MockAnsiString]);
+    Map.putPair([4, MockAnsiString]);
 
     // check if added vars are in order
-    iter := map.start;
+    iter := Map.start;
     SetToKey(iter);
     for var i := 1 to 4 do
     begin
       Assert.IsTrue(i = getInteger(iter));
-      Advance(iter);
+      advance(iter);
     end;
 
-    iter := map.start;
+    iter := Map.start;
     SetToValue(iter);
     Assert.AreEqual(100, getInteger(iter), 'getInteger() error');
-    Advance(iter);
+    advance(iter);
     Assert.AreEqual('A Wide String', getString(iter), 'getString() error');
-    Advance(iter);
+    advance(iter);
     Assert.AreEqual(3.1415, getExtended(iter), 'getExtended() error');
-    Advance(iter);
+    advance(iter);
     Assert.AreEqual(MockAnsiString, getAnsiString(iter), 'getAnsiString() error');
   finally
-    if Assigned(map) then
-      Map.Free;
+    Map.Free;
   end;
 
 end;
 
 procedure TDecalMapTest.TestCanStoreAndRetriveObjects;
-var map : DMap;
-var iter : DIterator;
-var MockObject : TDecalMockClassSimple;
+var Map : DMap;
+    iter : DIterator;
+    MockObject : TDecalMockClassSimple;
 begin
-  map := NIL;
+  Map := nil;
   try
-    map := DMap.Create;
+    Map := DMap.Create;
     MockObject := TDecalMockClassSimple.Create(4711);
-    map.putPair([1000, MockObject]);
+    Map.putPair([1000, MockObject]);
 
     // suppressing warning H2077 (value never used) is intended
     NilWithoutFree(Pointer(MockObject));
 
-    iter := map.start;
+    iter := Map.start;
     SetToValue(iter);
     MockObject := getObject(iter) as TDecalMockClassSimple;
     Assert.IsNotNull(MockObject);
     Assert.AreEqual('TDecalMockClassSimple', MockObject.ClassName, 'getObject() returning wrong class');
-    Assert.AreEqual(MockObject.getIdentifier, 4711);
+    Assert.AreEqual(MockObject.GetIdentifier, 4711);
 
   finally
-    if Assigned(map) then
+    if Assigned(Map) then
     begin
-      ObjFree(map);
-      map.Free;
+      objFree(Map);
+      Map.Free;
     end;
   end;
 
@@ -114,25 +103,23 @@ end;
 
 
 procedure TDecalMapTest.TestCanStoreAndRetriveInterfaces;
-var map : DMap;
-var iter : DIterator;
-var interfaceTest : IDeCAlTestInterface;
+var Map : DMap;
+    iter : DIterator;
+    InterfaceTest : IDeCALTestInterface;
 begin
-  map := NIL;
+  Map := DMap.Create;
   try
-    map := DMap.Create;
-    interfaceTest := TDecalInterfacedClass.Create;
-    map.putPair([2000, interfaceTest]);
+    InterfaceTest := TDecalInterfacedClass.Create;
+    Map.putPair([2000, InterfaceTest]);
 
-    iter := map.start;
+    iter := Map.start;
     SetToValue(iter);
 
-    interfaceTest := IDeCALTestInterface(DeCAL.getInterface(iter));
-    Assert.AreEqual(4711, interfaceTest.getIdentifier, 'getInterface() error');
+    InterfaceTest := IDeCALTestInterface(DeCAL.getInterface(iter));
+    Assert.AreEqual(4711, InterfaceTest.GetIdentifier, 'getInterface() error');
 
   finally
-    if Assigned(map) then
-      Map.Free;
+    Map.Free;
   end;
 end;
 

@@ -3,119 +3,108 @@
 interface
 
 uses
-  DeCAL,
-  System.SysUtils, // IntToStr
-  DUnitX.TestFramework;
+  DeCAL;
 
 const TestCases = 1000;
 
-Function eReport(const AMessage : String; ACulprit : DContainer) : String;
+function EReport(const AMessage : string; ACulprit : DContainer) : string;
 
 // non-associative test data
-procedure AddSimpleTestData(container : DContainer);
-procedure VerifySimpleAddedTestData(container : DContainer);
+procedure AddSimpleTestData(Container : DContainer);
+procedure VerifySimpleAddedTestData(Container : DContainer);
 
 // for sorting tests
-procedure AddRandomIntegers(container : DContainer);
-procedure PutRandomIntegers(container : DAssociative);
+procedure AddRandomIntegers(Container : DContainer);
 
 // associative test data
-procedure PutSimpleTestData(container : DAssociative);
-procedure VerifySimplePutTestData(container : DAssociative; UseLocate : Boolean);
+procedure PutSimpleTestData(Container : DAssociative);
+procedure VerifySimplePutTestData(Container : DAssociative; UseLocate : Boolean);
 
 implementation
+uses
+  DUnitX.TestFramework;
 
-Function eReport(const AMessage : String; ACulprit : DContainer) : String;
+function EReport(const AMessage : string; ACulprit : DContainer) : string;
 begin
   Result := AMessage + ' (in ' + ACulprit.ClassName + ')';
 end;
 
-procedure AddSimpleTestData(container : DContainer);
+procedure AddSimpleTestData(Container : DContainer);
 var SomeAnsiString : AnsiString;
 begin
-  container.add([100]);
-  container.add(['A Wide String']);
-  container.add([3.1415]);
-  SomeAnsiString := 'An Ansi String';
-  container.add([SomeAnsiString]);
-  container.add([True]);
+  Container.add([100]);
+  Container.add(['A Wide string']);
+  Container.add([3.1415]);
+  SomeAnsiString := 'An Ansi string';
+  Container.add([SomeAnsiString]);
+  Container.add([True]);
 end;
 
-procedure VerifySimpleAddedTestData(container : DContainer);
+procedure VerifySimpleAddedTestData(Container : DContainer);
 var iter : DIterator;
-var SomeAnsiString : AnsiString;
+    SomeAnsiString : AnsiString;
 begin
-  SomeAnsiString := 'An Ansi String';
-  iter := container.start;
-  Assert.AreEqual(100, getInteger(iter), eReport('getInteger() error', container));
-  Advance(iter);
-  Assert.AreEqual('A Wide String', getString(iter), eReport('getString() error', container));
-  Advance(iter);
-  Assert.AreEqual(3.1415, getExtended(iter), eReport('getExtended() error', container));
-  Advance(iter);
-  Assert.AreEqual(SomeAnsiString, getAnsiString(iter), eReport('getAnsiString() error', container));
-  Advance(iter);
-  Assert.IsTrue(getBoolean(iter), eReport('getBoolean() error', container));
+  SomeAnsiString := 'An Ansi string';
+  iter := Container.start;
+  Assert.AreEqual(100, getInteger(iter), EReport('getInteger() error', Container));
+  advance(iter);
+  Assert.AreEqual('A Wide string', getString(iter), EReport('getString() error', Container));
+  advance(iter);
+  Assert.AreEqual(3.1415, getExtended(iter), EReport('getExtended() error', Container));
+  advance(iter);
+  Assert.AreEqual(SomeAnsiString, getAnsiString(iter), EReport('getAnsiString() error', Container));
+  advance(iter);
+  Assert.IsTrue(getBoolean(iter), EReport('getBoolean() error', Container));
 end;
 
-procedure AddRandomIntegers(container : DContainer);
+procedure AddRandomIntegers(Container : DContainer);
 begin
   for var i := 1 to TestCases do
-    container.add([random(MaxInt)]);
+    Container.add([Random(MaxInt)]);
 end;
 
-procedure PutRandomIntegers(container : DAssociative);
-var rnd : Integer;
-begin
-  for var i := 1 to TestCases do
-  begin
-    rnd := random(MaxInt);
-    container.putPair([rnd, IntToStr(rnd)]);
-  end;
-end;
-
-procedure PutSimpleTestData(container : DAssociative);
+procedure PutSimpleTestData(Container : DAssociative);
 var SomeAnsiString : AnsiString;
 begin
-  SomeAnsiString := 'An Ansi String';
-  container.putPair([100, 4711]);
-  container.putPair([200, 'A Wide String']);
-  container.putPair([300, 3.1415]);
-  container.putPair([400, SomeAnsiString]);
-  container.putPair([500, True]);
+  SomeAnsiString := 'An Ansi string';
+  Container.putPair([100, 4711]);
+  Container.putPair([200, 'A Wide string']);
+  Container.putPair([300, 3.1415]);
+  Container.putPair([400, SomeAnsiString]);
+  Container.putPair([500, True]);
 end;
 
-procedure VerifySimplePutTestData(container : DAssociative; UseLocate : Boolean);
-var iterators : array[1..5] of DIterator;
-var iter : DIterator;
-var SomeAnsiString : AnsiString;
-var i : Integer;
+procedure VerifySimplePutTestData(Container : DAssociative; UseLocate : Boolean);
+var Iterators : array[1..5] of DIterator;
+    iter : DIterator;
+    SomeAnsiString : AnsiString;
+    i : Integer;
 begin
   if UseLocate then
   begin
     for i := 1 to 5 do
-      iterators[i] := container.locate([100 * i]);
+      Iterators[i] := Container.locate([100 * i]);
   end
   else
   begin
-    iter := container.start;
+    iter := Container.start;
     for i := 1 to 5 do
     begin
-      iterators[i] := iter;
-      Advance(iter);
+      Iterators[i] := iter;
+      advance(iter);
     end;
   end;
 
-  SomeAnsiString := 'An Ansi String';
-  Assert.AreEqual(4711, getInteger(iterators[1]), eReport('getInteger() error', container));
-  iter := container.locate([200]);
-  Assert.AreEqual('A Wide String', getString(iterators[2]), eReport('getString() error', container));
-  iter := container.locate([300]);
-  Assert.AreEqual(3.1415, getExtended(iterators[3]), eReport('getExtended() error', container));
-  iter := container.locate([400]);
-  Assert.AreEqual(SomeAnsiString, getAnsiString(iterators[4]), eReport('getAnsiString() error', container));
-  iter := container.locate([500]);
-  Assert.IsTrue(getBoolean(iter), eReport('getBoolean() error', container));
+  SomeAnsiString := 'An Ansi string';
+  Assert.AreEqual(4711, getInteger(Iterators[1]), EReport('getInteger() error', Container));
+  iter := Container.locate([200]);
+  Assert.AreEqual('A Wide string', getString(Iterators[2]), EReport('getString() error', Container));
+  iter := Container.locate([300]);
+  Assert.AreEqual(3.1415, getExtended(Iterators[3]), EReport('getExtended() error', Container));
+  iter := Container.locate([400]);
+  Assert.AreEqual(SomeAnsiString, getAnsiString(Iterators[4]), EReport('getAnsiString() error', Container));
+  iter := Container.locate([500]);
+  Assert.IsTrue(getBoolean(iter), EReport('getBoolean() error', Container));
 end;
 
 end.

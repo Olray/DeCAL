@@ -3,67 +3,56 @@
 interface
 
 uses
-  System.SysUtils,  // IntToStr
   DeCAL,
-  DeCAL.MockClasses,
   DUnitX.TestFramework;
 
 type
   [TestFixture]
   TDecalTransformTests = class
   private
-    function UnaryTestFunction(const obj : DObject) : DObject;
+    function UnaryTestFunction(const Obj : DObject) : DObject;
   public
-    [Setup]
-    procedure Setup;
-    [TearDown]
-    procedure TearDown;
 
     [Test]
     procedure TestTransformUnary;
   end;
 
 implementation
+uses
+  System.SysUtils;  // IntToStr
 
-procedure TDecalTransformTests.Setup;
+function TDecalTransformTests.UnaryTestFunction(const Obj : DObject) : DObject; // DUnary
 begin
-end;
-
-procedure TDecalTransformTests.TearDown;
-begin
-end;
-
-//  DUnary = function(const obj : DObject) : DObject of object;
-function TDecalTransformTests.UnaryTestFunction(const obj : DObject) : DObject;
-begin
-  Result := make([IntToStr(obj.VInteger)]);
+  Result := make([IntToStr(Obj.VInteger)]);
 end;
 
 procedure TDecalTransformTests.TestTransformUnary;
-var arr1, arr2 : DArray;
-var iter : DIterator;
-var i : Integer;
+var Array1, Array2 : DArray;
+    Iter : DIterator;
+    i : Integer;
 begin
-   arr1 := DArray.Create;
+   Array1 := DArray.Create;
    for i := 1 to 100 do
-     arr1.add([i]);
+     Array1.add([i]);
 
-   arr2 := DArray.Create;
+   Array2 := DArray.Create;
 
-   transformUnary(arr1, arr2, UnaryTestFunction);
+   transformUnary(Array1, Array2, UnaryTestFunction);
 
-   // arr2 should now contain the numbers of 1 to 100 as strings
-   iter := arr2.start;
+   // Array2 should now contain the numbers of 1 to 100 as strings
+   Iter := Array2.start;
    for i := 1 to 100 do
    begin
-     Assert.AreEqual(IntToStr(i), getString(iter));
-     Advance(iter);
+     Assert.AreEqual(IntToStr(i), getString(Iter));
+     advance(Iter);
    end;
-   Assert.IsTrue(atEnd(iter));
+   Assert.IsTrue(atEnd(Iter));
 
-   FreeAll([arr1, arr2]);
+   FreeAll([Array1, Array2]);
 end;
 
+initialization
+  TDUnitX.RegisterTestFixture(TDecalTransformTests);
 
 end.
 
