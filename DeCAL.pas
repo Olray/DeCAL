@@ -271,41 +271,41 @@ type
   {** A procedural equivalent to the DComparator closure.  Use these when you
   want your comparator to be a procedure instead of a closure. They can be
   converted to DComparator with the MakeComparator function. }
-  DComparatorProc = function(ptr : Pointer; const obj1, obj2 : DObject) : Integer;
+  DComparatorProc = reference to function(ptr : Pointer; const obj1, obj2 : DObject) : Integer;
 
   {** Test to see if the two objects are the same. }
-  DEquals = function(const obj1, obj2 : DObject) : Boolean of object;
+  DEquals = reference to function(const obj1, obj2 : DObject) : Boolean;
   {** Procedural equivalent to DEquals. }
   DEqualsProc = function(ptr : Pointer; const obj1, obj2 : DObject) : Boolean;
 
   {** Apply a generic test to an object.  Usually used to select objects from
    a container. }
-  DTest = function(const obj : DObject) : Boolean of object;
+  DTest = reference to function(const obj : DObject) : Boolean;
   {** Procedural equivalent to DTest. }
   DTestProc = function(ptr : Pointer; const obj : DObject) : Boolean;
 
   {** Apply a test to two objects. }
-  DBinaryTest = function(const obj1, obj2 : DObject) : Boolean of object;
+  DBinaryTest = reference to function(const obj1, obj2 : DObject) : Boolean;
   {** Procedural equivalent to DBinaryTest. }
   DBinaryTestProc = function(ptr : Pointer; const obj1, obj2 : DObject) : Boolean;
 
   {** Apply a function to an object.  Usually used in apply functions. }
-  DApply = procedure(const obj : DObject) of object;
+  DApply = reference to procedure(const obj : DObject);
   {** Procedural equivalent to DApply. }
   DApplyProc = procedure(ptr : Pointer; const obj : DObject);
 
   {** Apply a function to an object.  Usually used in collect functions. }
-  DUnary = function(const obj : DObject) : DObject of object;
+  DUnary = reference to function(const obj : DObject) : DObject;
   {** Procedural equivalent to DUnary. }
   DUnaryProc = function(ptr : Pointer; const obj : DObject) : DObject;
 
   {** Apply a function to two objects.  Usually used in transform functions. }
-  DBinary = function(const obj1, obj2 : DObject) : DObject of object;
+  DBinary = reference to function(const obj1, obj2 : DObject) : DObject;
   {** Procedural equivalent to DBinary. }
   DBinaryProc = function(ptr : Pointer; const obj1, obj2 : DObject) : DObject;
 
   {** A generator creates DObjects. }
-  DGenerator = function : DObject of object;
+  DGenerator = reference to function : DObject;
 
   {** Procedural equivalent to DGenerator.}
   DGeneratorProc = function(ptr : Pointer) : DObject;
@@ -1661,7 +1661,7 @@ type
   //
   ////////////////////////////////////////////////////////////////////
 
-  DHash = function(const buffer; byteCount : Integer) : Integer of object;
+  DHash = reference to function(const buffer; byteCount : Integer) : Integer;
   DHashProc = function(ptr : Pointer; const buffer; byteCount : Integer) : Integer;
 
   DInternalHash = class(DAssociative)
@@ -4589,6 +4589,7 @@ if assertions are active. }
 function getString(const iterator : DIterator) : string;
 begin
   {$IFDEF UNICODE}
+  var temp := iterator.Handler.iget(iterator).VType;
   if iterator.Handler.iget(iterator).VType = vtUnicodeString then
   begin
     Result := UnicodeString(iterator.Handler.iget(iterator).VUnicodeString);
@@ -11343,98 +11344,130 @@ end;
 
 function MakeComparatorEx(proc : DComparatorProc; ptr : Pointer) : DComparator;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DComparator(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeEqualsEx(proc : DEqualsProc; ptr : Pointer) : DEquals;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DEquals(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeTestEx(proc : DTestProc; ptr : Pointer) : DTest;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DTest(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeApplyEx(proc : DApplyProc; ptr : Pointer) : DApply;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DApply(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeUnaryEx(proc : DUnaryProc; ptr : Pointer) : DUnary;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DUnary(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeBinaryEx(proc : DBinaryProc; ptr : Pointer) : DBinary;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DBinary(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeHashEx(proc : DHashProc; ptr : Pointer) : DHash;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DHash(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeGeneratorEx(proc : DGeneratorProc; ptr : Pointer) : DGenerator;
 begin
-  TMethod(result).data := ptr;
-  TMethod(result).code := @proc;
+  Result := DGenerator(proc);
+//  TMethod(result).data := ptr;
+//  TMethod(result).code := @proc;
 end;
 
 function MakeComparator(proc : DComparatorProc) : DComparator;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function(const obj1, obj2: DObject): Integer
+    begin
+      Result := proc(nil, obj1, obj2);
+    end;
 end;
 
 function MakeEquals(proc : DEqualsProc) : DEquals;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function(const obj1, obj2: DObject): Boolean
+    begin
+      Result := proc(nil, obj1, obj2);
+    end;
 end;
 
 function MakeTest(proc : DTestProc) : DTest;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function(const obj: DObject): Boolean
+    begin
+      Result := proc(nil, obj);
+    end;
 end;
 
 function MakeApply(proc : DApplyProc) : DApply;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    procedure(const obj: DObject)
+    begin
+      proc(nil, obj);
+    end;
 end;
 
 function MakeUnary(proc : DUnaryProc) : DUnary;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function(const obj1: DObject): DObject
+    begin
+      Result := proc(nil, obj1);
+    end;
 end;
 
 function MakeBinary(proc : DBinaryProc) : DBinary;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function(const obj1, obj2: DObject): DObject
+    begin
+      Result := proc(nil, obj1, obj2);
+    end;
 end;
 
 function MakeHash(proc : DHashProc) : DHash;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function(const buffer; byteCount:Integer): Integer
+    begin
+      Result := proc(nil, buffer, byteCount);
+    end;
 end;
 
 function MakeGenerator(proc : DGeneratorProc) : DGenerator;
 begin
-  TMethod(result).data := nil;
-  TMethod(result).code := @proc;
+  Result :=
+    function: DObject
+    begin
+      Result := proc(nil);
+    end;
 end;
 
 var

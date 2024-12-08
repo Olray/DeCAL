@@ -49,7 +49,7 @@ type
   obj1 is greater than obj2;
   @param obj1 The first object (left hand side).
   @param obj2 The second object (right hand side).}
-  DComparator = function (const obj1, obj2 : DObject) : Integer of object;
+  DComparator = reference to function (const obj1, obj2 : DObject) : Integer;
 
   PMergeArray = ^TMergeArray;
   TMergeArray = array of PDObject;

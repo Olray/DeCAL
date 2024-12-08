@@ -111,6 +111,7 @@
         <DCCReference Include="Test_Iterator.pas"/>
         <DCCReference Include="Test_RandomTesting.pas"/>
         <DCCReference Include="Test_Clone.pas"/>
+        <DCCReference Include="Test_Makers.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

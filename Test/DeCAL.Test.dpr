@@ -22,7 +22,8 @@ uses
   Test_Sort in 'Test_Sort.pas',
   Test_Iterator in 'Test_Iterator.pas',
   Test_RandomTesting in 'Test_RandomTesting.pas',
-  Test_Clone in 'Test_Clone.pas';
+  Test_Clone in 'Test_Clone.pas',
+  Test_Makers in 'Test_Makers.pas';
 
 begin
   TestInsight.DUnitX.RunRegisteredTests;
