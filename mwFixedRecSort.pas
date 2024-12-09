@@ -182,6 +182,8 @@ var
   FRecLen, fBuffersSize: Integer;
 
 implementation
+uses
+  System.IOUtils;
 
 constructor TSub3Array.Create(MaxValue: LongInt);
 begin
@@ -719,7 +721,9 @@ procedure TMergeFile.MergeSort(MergeCompare: DComparator);
 var
   a, b, c: String;
   N, todo: LongInt;
+  LTempDirectory: string;
 begin
+  LTempDirectory := IncludeTrailingPathDelimiter(TPath.GetTempPath);
   fOutList:= TStringList.Create;
   fOutList.Clear;
   todo:= 0;
@@ -731,7 +735,7 @@ begin
   begin
     while todo < fInList.Count do
     begin
-      fFileName:= 'Temp' + IntToStr(N);
+      fFileName:= LTempDirectory + 'Temp' + IntToStr(N);
       inc(N);
       Writer:= TmIOBuffer.Create(fFileName, fRecLen, fBuffersSize*3);
       fOutList.Add(fFileName);
@@ -798,7 +802,9 @@ procedure TFixRecSort.Start(Compare: DComparator);
 var
   TempFileName, BackFileName, InFileName: String;
   I, K: Integer;
+  LTempDirectory: string;
 begin
+  LTempDirectory := IncludeTrailingPathDelimiter(TPath.GetTempPath);
   FCompare:= Compare;
   I:= 0;
   InFileName:= fFileName;
@@ -808,7 +814,7 @@ begin
   while not Reader.Eof do
   begin
     fMerArray:= TM3Array.Create;
-    TempFileName:= 'Temp' + IntToStr(I);
+    TempFileName:= LTempDirectory + 'Temp' + IntToStr(I);
     fTempFileList.Add(TempFileName);
     Writer:= TmIOBuffer.Create(TempFileName, fRecLen, fBuffersSize);
     inc(I);
