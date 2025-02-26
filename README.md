@@ -31,7 +31,7 @@ There were no TESTS included other than the original files "DeCALTesting.pas" an
 unknown in the 1990's.
 **However, an increasing amount of tests have recently been added.**
 
-I'm currently using DeCAL with Delphi 11 "Community Edition" with no problems. I wouldn't suggest using it for large projects due to the
+I'm currently using DeCAL with Delphi 12.1 "Community Edition" with no problems. I wouldn't suggest using it for large projects due to the
 missing tests. **Use this fix at your own risk**
 
 ## Changes
