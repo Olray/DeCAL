@@ -1385,7 +1385,6 @@ var len : Integer;
     pc : PPChar;
     po : PObject;
     ps : PString;
-    pwc : PWideChar;
     ptr : PChar;
     pi : PInteger;
 begin

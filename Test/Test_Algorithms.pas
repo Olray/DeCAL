@@ -21,7 +21,7 @@ type
     procedure TestRemoveCopyIfIn;
 
     [Test]
-    procedure TestApply;
+    procedure TestInject;
   end;
 
 implementation
@@ -92,7 +92,7 @@ begin
 end;
 
 
-procedure TTestAlgorithms.TestApply;
+procedure TTestAlgorithms.TestInject;
 const TestCount = 200;
 var i: Integer;
     Arr: DArray;
@@ -130,6 +130,7 @@ end;
 
 function TTestAlgorithms.CalcSum(const Obj, Obj2 : DObject): DObject;
 begin
+  Result.VType := vtInteger;
   Result.VInteger := Obj.VInteger + Obj2.VInteger;
 end;
 
